@@ -10,6 +10,16 @@ import (
 	"strings"
 )
 
+// zapLogger 定义配置项
+type ZapLogger struct {
+	FilePath   string `yml:"file_path" json:"file_path"`
+	MaxSize    int    `yml:"max_size" json:"max_size"`
+	MaxBackups int    `yml:"max_backups" json:"max_backups"`
+	MaxAge     int    `yml:"max_age" json:"max_age"`
+	Compress   bool
+	Level      string
+}
+
 type AppConfInfo struct {
 	AppName         string `yml:"app_name" json:"app_name"`
 	HttpPort        int    `yml:"http_port" json:"http_port"`
@@ -25,6 +35,7 @@ type AppConfInfo struct {
 	RedisConf 	map[string]string	`yml:"redis_conf" json:"redis_conf"`
 	MysqlConf 	map[string]string	`yml:"mysql_conf" json:"redis_conf"`
 	LogConf 	map[string]string	`yml:"log_conf" json:"log_conf"`
+	//ZapConf 	*ZapLogger
 }
 
 var AppConf *AppConfInfo
