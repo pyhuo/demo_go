@@ -12,6 +12,7 @@ jwt_salt: testsalt
 redisconf:
   address: 127.0.0.1:6379
   auth: "123456"
+  db: "2"
   name: redis
   type: tcp
 mysqlconf:

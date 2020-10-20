@@ -55,3 +55,17 @@ func TestCacheRead(t *testing.T) {
 	info()
 	wg.Wait()
 }
+
+func TestCacheSetJson(t *testing.T)  {
+	m := make(map[string]string, 10)
+	m["usename"] = "666"
+	m["phoneNum"] = "8888"
+
+	rc := RedisClient.Get()
+	defer rc.Close()
+	k := "user"
+	_, e := HandlerJson(rc, k, m)
+	errCheck(e)
+	user := JsonToBean(rc, k)
+	fmt.Printf("user from cache:%v\n", user)
+}

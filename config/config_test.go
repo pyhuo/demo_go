@@ -23,6 +23,7 @@ func TestNewConf(t *testing.T) {
 		"type":    "tcp",
 		"address": "127.0.0.1:6379",
 		"auth":    "123456",
+		"db":		"2",
 	}
 
 

@@ -14,6 +14,7 @@ redisconf:
   auth: ""
   name: redis
   type: tcp
+  db: "2"
 mysqlconf:
   allconfig: root:@tcp(localhost:3306)/mydb
   host: "3306"
