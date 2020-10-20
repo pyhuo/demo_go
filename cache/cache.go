@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gomodule/redigo/redis"
-	"os"
+	"demo_go/config"
 	//"time"
 )
 
@@ -25,7 +25,7 @@ func info() {
 //操作json
 func HandlerJson(con redis.Conn, k string, v interface{}) (reply interface{}, err error){
 	data, e := json.Marshal(v)
-	errCheck(e)
+	config.ErrCheck(e)
 	return con.Do("set", k, data)
 }
 
@@ -33,16 +33,10 @@ func HandlerJson(con redis.Conn, k string, v interface{}) (reply interface{}, er
 func JsonToBean(con redis.Conn, k string) map[string]interface{} {
 	m := make(map[string]interface{})
 	data, e := redis.Bytes(con.Do("get", k))
-	errCheck(e)
+	config.ErrCheck(e)
 	err := json.Unmarshal(data, &m)
-	errCheck(err)
+	config.ErrCheck(err)
 	return m
 }
 
 
-func errCheck(err error) {
-	if err != nil {
-		fmt.Println("sorry,has some error:", err)
-		os.Exit(-1)
-	}
-}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v2"
 	iot "io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -23,12 +24,13 @@ type AppConfInfo struct {
 	JwtSalt         string `yaml:"jwt_salt" json:"jwt_salt"`
 	RedisConf 	map[string]string	`yml:"redis_conf" json:"redis_conf"`
 	MysqlConf 	map[string]string	`yml:"mysql_conf" json:"redis_conf"`
+	LogConf 	map[string]string	`yml:"log_conf" json:"log_conf"`
 }
 
 var AppConf *AppConfInfo
 
 func init() {
-	//Init("debug")
+	//Init("debug", "")
 }
 
 var TestData = []byte(`
@@ -61,13 +63,10 @@ mysqlconf:
 func Init(env string, filepath string) {
 	var err error
 	if AppConf != nil {
-		fmt.Printf("t:%v\nAppConf:%v\n", env, AppConf)
-		return
 	}
 	if filepath == "" {
 		filepath = "conf/app.yml"
 	}
-
 	if env == "debug" {
 		AppConf, err = LoadConfFromData(TestData, "yml")
 	}else{
@@ -76,7 +75,7 @@ func Init(env string, filepath string) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("env:%v err:%v\nAppConf:%v\n", env, err, AppConf)
+	fmt.Printf("env:%v err:%v\n\n", env, err)
 }
 
 func LoadConf(filepath string) (item *AppConfInfo, err error) {
@@ -120,7 +119,10 @@ func LoadConfFromData(data []byte, t string) (item *AppConfInfo, err error) {
 	return item, nil
 }
 
-
-
-
+func ErrCheck(err error) {
+	if err != nil {
+		fmt.Println("sorry,has some error:", err)
+		os.Exit(-1)
+	}
+}
 

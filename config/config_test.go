@@ -26,6 +26,9 @@ func TestNewConf(t *testing.T) {
 		"db":		"2",
 	}
 
+	var LogConfig = map[string]string{
+		"default_path":    "./log/log.debug",
+	}
 
 	conf := AppConfInfo{
 		AppName:         "bdev",
@@ -41,6 +44,7 @@ func TestNewConf(t *testing.T) {
 		JwtSalt:         "testsalt",
 		RedisConf: RedisConfig,
 		MysqlConf: MySqlConfig,
+		LogConf:  LogConfig,
 	}
 
 
