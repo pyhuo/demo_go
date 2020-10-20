@@ -3,6 +3,8 @@ package db
 import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"time"
+
 	//"gorm.io/driver/sqlite"
 	"demo_go/logger"
 )
@@ -18,4 +20,12 @@ func init() {
 		panic("failed to connect database")
 	}
 	logger.Debugf("db init:%v", DB)
+
+	sqlDB, err := DB.DB()
+	// SetMaxIdleConns 设置空闲连接池中连接的最大数量
+	sqlDB.SetMaxIdleConns(2)
+	// SetMaxOpenConns 设置打开数据库连接的最大数量。
+	sqlDB.SetMaxOpenConns(100)
+	// SetConnMaxLifetime 设置了连接可复用的最大时间。
+	sqlDB.SetConnMaxLifetime(time.Hour)
 }
