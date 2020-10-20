@@ -5,6 +5,8 @@ import (
 	//_ "demo_go/routers"
 	//_ "github.com/lib/pq"
 	"sync"
+	// web server
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
@@ -22,8 +24,8 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		//grpcStart()
-		logger.Debug("grpc server start ")
+		logger.Debug("ginStart server start ")
+		ginStart()
 		wg.Done()
 	}()
 	wg.Wait()
@@ -43,3 +45,13 @@ func main() {
 //		panic(err)
 //	}
 //}
+
+func ginStart()  {
+	r := gin.Default()
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
+	r.Run()
+}
