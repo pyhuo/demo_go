@@ -1,10 +1,10 @@
 package cache
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/gomodule/redigo/redis"
 	"demo_go/config"
+	"demo_go/logger"
+	"encoding/json"
+	"github.com/gomodule/redigo/redis"
 	//"time"
 )
 
@@ -16,9 +16,9 @@ func info() {
 	if e != nil {
 		panic(e)
 	}
-	fmt.Println("#######")
-	fmt.Printf("infos:\n%v\n", r)
-	fmt.Println("#######")
+	logger.Debug("#######")
+	logger.Debugf("infos:\n%v\n", r)
+	logger.Debug("#######")
 }
 
 

@@ -2,7 +2,7 @@ package cache
 
 import (
 	"demo_go/config"
-	"fmt"
+	"demo_go/logger"
 	"github.com/gomodule/redigo/redis"
 	"sync"
 	"testing"
@@ -17,7 +17,7 @@ func readName()  {
 	rc := RedisClient.Get()
 	defer rc.Close()
 	r, e := redis.String(rc.Do("get", "name"))
-	fmt.Println("name:", r, e)
+	logger.Debugf("name:%v err:%v\n", r, e)
 }
 
 func TestCacheSet(t *testing.T)  {
@@ -26,7 +26,7 @@ func TestCacheSet(t *testing.T)  {
 	defer rc.Close()
 	//time.Sleep(time.Second * 10)
 	r, e := redis.String(rc.Do("set", "name", "go"))
-	fmt.Println("set", r, e)
+	logger.Debug("set", r, e)
 }
 
 func TestCacheRead(t *testing.T) {
@@ -65,7 +65,7 @@ func TestCacheSetJson(t *testing.T)  {
 	defer rc.Close()
 	k := "user"
 	_, e := HandlerJson(rc, k, m)
-	errCheck(e)
+	logger.Debugf("e:%v", e)
 	user := JsonToBean(rc, k)
-	fmt.Printf("user from cache:%v\n", user)
+	logger.Debugf("user from cache:%v\n", user)
 }

@@ -2,7 +2,7 @@ package cache
 
 import (
 	"demo_go/config"
-	"fmt"
+	"demo_go/logger"
 	"github.com/gomodule/redigo/redis"
 	"time"
 )
@@ -20,7 +20,7 @@ func init() {
 }
 
 func infoClients()  {
-	fmt.Printf("RedisClient:%v\n", RedisClient)
+	logger.Debugf("RedisClient:%v\n", RedisClient)
 }
 
 //初始化连接池
