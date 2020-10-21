@@ -59,6 +59,37 @@ func TestModelUserRead(t *testing.T)  {
 	logger.Debugf("bf id:%v name:%v age:%v", user.ID, user.Name, user.Age)
 }
 
+func TestModelUserReadMany(t *testing.T)  {
+	rows, err := db.DB.Model(&User{}).Where("name = ?", "D42").Rows()
+	defer rows.Close()
+	if err != nil {
+		panic(err)
+	}
+	logger.Debugf("rows:%v ", rows)
+	for rows.Next() {
+		var user User
+		// ScanRows 方法用于将一行记录扫描至结构体
+		db.DB.ScanRows(rows, &user)
+		// 业务逻辑...
+		logger.Debugf(" id:%v name:%v age:%v", user.ID, user.Name, user.Age)
+	}
+
+}
+
+func TestModelUserReadRaw(t *testing.T)  {
+	//users := make([]User, 0)
+	//db.DB.Raw("SELECT id, name, age FROM users WHERE name = ?", "D42").Scan(&users)
+	//logger.Debugf("users:%v", users)
+	var user User
+	db.DB.Raw("SELECT id, name, age FROM users WHERE name = ? limit 1", "D42").Scan(&user)
+	logger.Debugf("raw sql id:%v name:%v age:%v", user.ID, user.Name, user.Age)
+	//for user := range users {
+		//logger.Debugf("u:%v", user)
+	//	logger.Debugf("raw sql id:%v name:%v age:%v", user.ID, user.Name, user.Age)
+	//}
+}
+
+
 func TestModelUserDelete(t *testing.T)  {
 	var user User
 	db.DB.First(&user, "name = ?", "D42")

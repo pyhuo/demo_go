@@ -8,7 +8,12 @@ import (
 
 func init() {
 	// 迁移 schema
-	logger.Debug("ORM AutoMigrate")
-	db.DB.AutoMigrate(&Product{})
-	db.DB.AutoMigrate(&User{})
+	err := db.DB.AutoMigrate(
+		&Product{},
+		&User{},
+		)
+	logger.Debugf("ORM AutoMigrate err:%v", err)
+	if err != nil {
+		panic(err)
+	}
 }

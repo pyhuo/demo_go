@@ -2,6 +2,8 @@ package main
 
 import (
 	"demo_go/logger"
+	_ "demo_go/model"
+	"demo_go/controller"
 	//_ "demo_go/routers"
 	//_ "github.com/lib/pq"
 	"sync"
@@ -17,7 +19,6 @@ func init() {
 	//beego.BConfig.Listen.HTTPPort = config.AppConf.HttpPort
 	//beego.BConfig.WebConfig.EnableDocs = config.AppConf.EnableDocs
 	//beego.BConfig.WebConfig.AutoRender = config.AppConf.AutoRender
-	//models.InitDB()
 }
 
 func main() {
@@ -48,10 +49,7 @@ func main() {
 
 func ginStart()  {
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	r.GET("/ping", controller.PingHandler)
+	r.GET("/pool", controller.PoolHandler)
 	r.Run()
 }

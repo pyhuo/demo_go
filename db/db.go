@@ -19,7 +19,7 @@ func init() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	logger.Debugf("db init:%v", DB)
+	logger.Debugf("DB init:%v", DB)
 
 	sqlDB, err := DB.DB()
 	if err != nil {
@@ -28,9 +28,10 @@ func init() {
 		panic(err)
 	}
 	// SetMaxIdleConns 设置空闲连接池中连接的最大数量
-	sqlDB.SetMaxIdleConns(2)
+	sqlDB.SetMaxIdleConns(200)
 	// SetMaxOpenConns 设置打开数据库连接的最大数量。
-	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetMaxOpenConns(200)
 	// SetConnMaxLifetime 设置了连接可复用的最大时间。
 	sqlDB.SetConnMaxLifetime(time.Hour)
+	logger.Debugf("DB Pool:%v", sqlDB)
 }
