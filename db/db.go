@@ -22,6 +22,11 @@ func init() {
 	logger.Debugf("db init:%v", DB)
 
 	sqlDB, err := DB.DB()
+	if err != nil {
+		logger.Errorf("db init:%v", DB)
+		// os.sig
+		panic(err)
+	}
 	// SetMaxIdleConns 设置空闲连接池中连接的最大数量
 	sqlDB.SetMaxIdleConns(2)
 	// SetMaxOpenConns 设置打开数据库连接的最大数量。
