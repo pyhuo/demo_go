@@ -3,6 +3,7 @@ package model
 import (
 	"demo_go/db"
 	"demo_go/logger"
+	"gorm.io/gorm"
 	"sort"
 	"strings"
 	"testing"
@@ -11,6 +12,14 @@ import (
 
 func Now() time.Time{
 	return time.Now()
+}
+
+func handlerDBErr(t *testing.T, result *gorm.DB, key string)  {
+	if result.Error != nil {
+		t.Error(result.Error)
+		return
+	}
+	logger.Debugf("%s RowsAffected:%d", key, result.RowsAffected)
 }
 
 
@@ -35,22 +44,39 @@ func TestModelProduct(t *testing.T)  {
 
 
 func TestModelUserCreate(t *testing.T)  {
-	// Create
-	//email := "hyhlinux@163.com"
-	//result := db.DB.Create(&User{Name: "D42", Email: email, Age: 18, Birthday: time.Now()})
-	var user User
-	user = User{Name: "ScanRowsUser3", Age: 20, Email: "hyhlinux@165.com", Birthday: time.Now()}
-	result := db.DB.Save(&user)
-	if result.Error != nil {
-		logger.Error(result.Error)
+	//var user User
+	//user = User{Name: "ScanRowsUser3", Age: 20, Email: "hyhlinux@165.com", Birthday: time.Now()}
+	//result := db.DB.Debug().Create(&user)
+	// 指定字段
+	// [1.286ms] [rows:1] INSERT INTO `users` (`name`,`age`,`birthday`) VALUES ('ScanRowsUser3',20,'2020-10-22 14:09:56.913')
+	//result := db.DB.Debug().Select("Name", "Age", "Birthday").Create(&user)
+	//handlerDBErr(t, result)
+	//logger.Debugf("id:%d", user.ID)
+	//批量插入
+	var users = []User{
+		{Name: "ScanRowsUser1", Age: 21, Email: "hyhlinux@165.com", Birthday: time.Now()},
+		{Name: "ScanRowsUser2", Age: 22, Email: "hyhlinux@165.com", Birthday: time.Now()},
+		{Name: "ScanRowsUser3", Age: 23, Email: "hyhlinux@165.com", Birthday: time.Now()},
 	}
-	var newUser User
-	db.DB.First(&newUser, "name = ?", user.Name)
-	//db.DB.Model(&user).Update("Name", "test")
-	//logger.Debugf("id:%v name:%v age:%v Birthday:%v", user.ID, user.Name, user.Age, user.Birthday)
-	logger.Debugf("id:%v name:%v age:%v Birthday:%v", newUser.ID, newUser.Name, newUser.Age, newUser.Birthday)
-}
+	result := db.DB.Debug().Create(&users)
+	handlerDBErr(t, result, "bulk create")
+	for _, user := range users {
+		logger.Debugf("id:%d", user.ID)
+	}
+	// 根据 Map 创建
+	result = db.DB.Model(&User{}).Debug().Create(map[string]interface{}{
+		"Name": "ScanRowsUser1", "Age": 21, "Email": "hyhlinux@165.com", "Birthday": time.Now(),
+	})
+	handlerDBErr(t, result, "map create one")
 
+	// 根据 `[]map[string]interface{}{}` 批量插入
+	result = db.DB.Model(&User{}).Debug().Create([]map[string]interface{}{
+		{"Name": "ScanRowsUser12", "Age": 21, "Email": "hyhlinux@165.com", "Birthday": time.Now()},
+		{"Name": "ScanRowsUser13", "Age": 21, "Email": "hyhlinux@165.com", "Birthday": time.Now()},
+		{"Name": "ScanRowsUser14", "Age": 21, "Email": "hyhlinux@165.com", "Birthday": time.Now()},
+	})
+	handlerDBErr(t, result, "map bulk create")
+}
 
 func TestScanRows(t *testing.T) {
 	user1 := User{Name: "ScanRowsUser1", Age: 1, Birthday: Now()}
@@ -87,19 +113,6 @@ func TestScanRows(t *testing.T) {
 	for _, u := range results {
 		logger.Debugf("row:%v", u)
 	}
-	//if !reflect.DeepEqual(results, []Result{{Name: "ScanRowsUser2", Age: 10}, {Name: "ScanRowsUser3", Age: 20}}) {
-	//	t.Errorf("Should find expected results")
-	//}
-	//
-	//var ages int
-	//if err := db.DB.Table("users").Where("name = ? or name = ?", user2.Name, user3.Name).Select("SUM(age)").Scan(&ages).Error; err != nil || ages != 30 {
-	//	t.Fatalf("failed to scan ages, got error %v, ages: %v", err, ages)
-	//}
-	//
-	//var name string
-	//if err := db.DB.Table("users").Where("name = ?", user2.Name).Select("name").Scan(&name).Error; err != nil || name != user2.Name {
-	//	t.Fatalf("failed to scan ages, got error %v, ages: %v", err, name)
-	//}
 }
 
 
@@ -117,39 +130,34 @@ func TestModelUserRead(t *testing.T)  {
 }
 
 func TestModelUserReadMany(t *testing.T)  {
-	rows, err := db.DB.Model(&User{}).Where("name = ?", "D42").Rows()
-	defer rows.Close()
+	rows, err := db.DB.Model(&User{}).Debug().Where("name = ?", "D42").Rows()
 	if err != nil {
 		panic(err)
 	}
+	defer rows.Close()
 	logger.Debugf("rows:%v ", rows)
 	for rows.Next() {
 		var user User
 		// ScanRows 方法用于将一行记录扫描至结构体
-		db.DB.ScanRows(rows, &user)
+		err = db.DB.ScanRows(rows, &user)
+		if err != nil {
+			panic(err)
+		}
 		// 业务逻辑...
 		logger.Debugf(" id:%v name:%v age:%v", user.ID, user.Name, user.Age)
 	}
-
 }
 
 func TestModelUserReadRaw(t *testing.T)  {
-	//users := make([]User, 0)
-	//db.DB.Raw("SELECT id, name, age FROM users WHERE name = ?", "D42").Scan(&users)
-	//logger.Debugf("users:%v", users)
 	var user User
 	db.DB.Raw("SELECT id, name, age FROM users WHERE name = ? limit 1", "D42").Scan(&user)
 	logger.Debugf("raw sql id:%v name:%v age:%v", user.ID, user.Name, user.Age)
-	//for user := range users {
-		//logger.Debugf("u:%v", user)
-	//	logger.Debugf("raw sql id:%v name:%v age:%v", user.ID, user.Name, user.Age)
-	//}
 }
 
 
 func TestModelUserDelete(t *testing.T)  {
 	var user User
 	db.DB.First(&user, "name = ?", "D42")
-	db.DB.Delete(&user, user.ID)
+	db.DB.Debug().Delete(&user, user.ID)
 	logger.Debugf("delete id:%v name:%v age:%v", user.ID, user.Name, user.Age)
 }
