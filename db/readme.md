@@ -1,6 +1,8 @@
 ## go配置mysql连接池
 * [mysql配置文档](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_max_connections)
 * max-connections=10000
+* [代码](https://github.com/pyhuo/demo_go/blob/main/db/db.go)
+* [orm](https://gorm.io/zh_CN/docs/sql_builder.html)
 
 ## 1.ab 发起并发请求测试
 * -c: 并发量100

@@ -3,9 +3,16 @@ package model
 import (
 	"demo_go/db"
 	"demo_go/logger"
+	"sort"
+	"strings"
 	"testing"
 	"time"
 )
+
+func Now() time.Time{
+	return time.Now()
+}
+
 
 func TestModelProduct(t *testing.T)  {
 	// Create
@@ -29,22 +36,72 @@ func TestModelProduct(t *testing.T)  {
 
 func TestModelUserCreate(t *testing.T)  {
 	// Create
-	email := "hyhlinux@163.com"
-	result := db.DB.Create(&User{Name: "D42", Email: email, Age: 18, Birthday: time.Now()})
+	//email := "hyhlinux@163.com"
+	//result := db.DB.Create(&User{Name: "D42", Email: email, Age: 18, Birthday: time.Now()})
+	var user User
+	user = User{Name: "ScanRowsUser3", Age: 20, Email: "hyhlinux@165.com", Birthday: time.Now()}
+	result := db.DB.Save(&user)
 	if result.Error != nil {
 		logger.Error(result.Error)
 	}
-	var user User
-	db.DB.First(&user, "name = ?", "D42")
+	var newUser User
+	db.DB.First(&newUser, "name = ?", user.Name)
 	//db.DB.Model(&user).Update("Name", "test")
-	logger.Debugf("id:%v name:%v age:%v Birthday:%v", user.ID, user.Name, user.Age, user.Birthday)
-	//if user.ID != 0{
-	//	logger.Debugf("delete id:%v", user.ID)
-	//	db.DB.Delete(&user, user.ID)
-	//}
-	//result.Error        // 返回 error
-	//result.RowsAffected // 返回插入记录的条数
+	//logger.Debugf("id:%v name:%v age:%v Birthday:%v", user.ID, user.Name, user.Age, user.Birthday)
+	logger.Debugf("id:%v name:%v age:%v Birthday:%v", newUser.ID, newUser.Name, newUser.Age, newUser.Birthday)
 }
+
+
+func TestScanRows(t *testing.T) {
+	user1 := User{Name: "ScanRowsUser1", Age: 1, Birthday: Now()}
+	user2 := User{Name: "ScanRowsUser2", Age: 10, Birthday: Now()}
+	user3 := User{Name: "ScanRowsUser3", Age: 20, Birthday: Now()}
+	tx := db.DB.Save(&user1).Save(&user2).Save(&user3)
+	logger.Debugf("%v", tx)
+
+	rows, err := db.DB.
+		Table("users").
+		Where("name = ? or name = ?", user2.Name, user3.Name).
+		Select("name, age, birthday").
+		Rows()
+	if err != nil {
+		t.Errorf("Not error should happen, got %v", err)
+	}
+
+	type Result struct {
+		Name string
+		Age  int
+	}
+	var results []Result
+	for rows.Next() {
+		var result Result
+		if err := db.DB.ScanRows(rows, &result); err != nil {
+			t.Errorf("should get no error, but got %v", err)
+		}
+		results = append(results, result)
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return strings.Compare(results[i].Name, results[j].Name) <= -1
+	})
+	for _, u := range results {
+		logger.Debugf("row:%v", u)
+	}
+	//if !reflect.DeepEqual(results, []Result{{Name: "ScanRowsUser2", Age: 10}, {Name: "ScanRowsUser3", Age: 20}}) {
+	//	t.Errorf("Should find expected results")
+	//}
+	//
+	//var ages int
+	//if err := db.DB.Table("users").Where("name = ? or name = ?", user2.Name, user3.Name).Select("SUM(age)").Scan(&ages).Error; err != nil || ages != 30 {
+	//	t.Fatalf("failed to scan ages, got error %v, ages: %v", err, ages)
+	//}
+	//
+	//var name string
+	//if err := db.DB.Table("users").Where("name = ?", user2.Name).Select("name").Scan(&name).Error; err != nil || name != user2.Name {
+	//	t.Fatalf("failed to scan ages, got error %v, ages: %v", err, name)
+	//}
+}
+
 
 func TestModelUserUpdate(t *testing.T)  {
 	var user User
